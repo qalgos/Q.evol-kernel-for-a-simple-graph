@@ -22,7 +22,7 @@ alpha=0.5
 list=[]
 for t in range(1,100,1):
     operator2=alpha * -((Y ^ I ^ I)+(I ^ Y ^ I) +(I ^ I ^ Y) )
-    operator1 =(X ^ X ^ I)+(Y ^ I ^ Z)+(I^X^Z)
+    operator1 =(Z ^ Z ^ I)+(Z ^ I ^ Z)+(I^Z^Z)
     operator= alpha * (-((Y ^ I ^ I)+(I ^ Y ^ I) +(I ^ I ^ Y)))
     evo = PauliEvolutionGate(operator, time=0.001)
     evo1 = PauliEvolutionGate(operator1, time=t)
