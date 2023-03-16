@@ -1,0 +1,101 @@
+import numpy as np
+from matplotlib import pyplot as plt
+# Importing standard Qiskit libraries
+from qiskit import QuantumCircuit, transpile, Aer, IBMQ
+from qiskit.tools.jupyter import *
+from qiskit.visualization import *
+from ibm_quantum_widgets import *
+from qiskit.providers.aer import QasmSimulator
+from qiskit.circuit import QuantumCircuit
+from qiskit.circuit.library import PauliEvolutionGate
+from qiskit.opflow import I, Z, X, Y
+from qiskit import QuantumCircuit, assemble, Aer
+from qiskit.visualization import plot_histogram, plot_bloch_vector
+from math import sqrt, pi
+from qiskit import QuantumCircuit, Aer, execute
+from qiskit.quantum_info import Pauli
+from qiskit.opflow import CircuitStateFn
+
+
+
+alpha=0.5
+list=[]
+for t in range(1,100,1):
+    operator2=alpha * -((Y ^ I ^ I)+(I ^ Y ^ I) +(I ^ I ^ Y) )
+    operator1 =(X ^ X ^ I)+(Y ^ I ^ Z)+(I^X^Z)
+    operator= alpha * (-((Y ^ I ^ I)+(I ^ Y ^ I) +(I ^ I ^ Y)))
+    evo = PauliEvolutionGate(operator, time=0.001)
+    evo1 = PauliEvolutionGate(operator1, time=t)
+    evo2 = PauliEvolutionGate(operator2, time=0.001)
+    # plug it into a circuit
+    circuit = QuantumCircuit(3)
+
+    circuit.append(evo, range(3))
+    circuit.append(evo1, range(3))
+    circuit.append(evo2, range(3))
+
+
+    backend = Aer.get_backend('statevector_simulator')
+    job = execute(circuit, backend)
+    result = job.result()
+    final_state = result.get_statevector()
+    norm = np.linalg.norm(final_state.data)
+    #print(norm) 
+
+    #print("Final statevector:", final_state)
+
+    psi= CircuitStateFn(circuit)
+
+    observable= (I^I^Z+I^Z^I+Z^I^I)/2 #total occupation operator
+    
+
+    #print( "EXPVAL:", psi.adjoint().compose(observable).compose(psi).eval().real )
+    list.append(psi.adjoint().compose(observable).compose(psi).eval().real)
+
+
+circuit.draw('mpl')
+#print(list)
+t=[]
+for i in range(1,100,1):
+    t.append(i)
+#plt.plot(t, list)
+#plt.title("$\\overline{o}(t)$") #to see the function $\overline{o}(t)$
+
+
+
+
+
+
+list1=np.array(list)
+
+
+y = np.fft.fft(list)
+
+
+
+#Create a frequency axis for the plot:
+freq = np.fft.fftfreq(len(list1), d=1/100)
+
+#inverse ft to check only:
+inv=np.real(np.fft.ifft(y))
+
+#print("Inverse:", inv)
+
+
+# Plot the magnitude of the Fourier coefficients
+plt.plot(freq, np.abs(y))
+
+
+# Set the axis labels and title
+plt.xlabel('Frequency')
+plt.ylabel('Magnitude')
+plt.title('Discrete Fourier Transform')
+plt.ylim([-0.1, 1.1])
+plt.xlim([-15, 15])
+
+# Show the plot
+plt.show()
+
+
+
+# Print the result
